@@ -260,6 +260,7 @@ func (cmdDeal *CmdDeal) sendDeals2Miner(taskName string, outputDir string, fileD
 					if err == nil {
 						break
 					}
+					time.Sleep(5 * time.Second)
 				}
 
 				if err != nil {
@@ -285,6 +286,7 @@ func (cmdDeal *CmdDeal) sendDeals2Miner(taskName string, outputDir string, fileD
 					if err == nil {
 						break
 					}
+					time.Sleep(5 * time.Second)
 				}
 
 				if err != nil {
