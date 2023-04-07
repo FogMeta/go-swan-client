@@ -254,7 +254,14 @@ func (cmdDeal *CmdDeal) sendDeals2Miner(taskName string, outputDir string, fileD
 			var cost string
 			var deal *libmodel.DealInfo
 			if cmdDeal.MarketVersion == libconstants.MARKET_VERSION_2 {
-				dealUuid, err := boost.GetClient(cmdDeal.SwanRepo).WithClient(lotusClient).StartDeal(&dealConfig)
+				var dealUuid string
+				for i := 0; i < 3; i++ {
+					dealUuid, err = boost.GetClient(cmdDeal.SwanRepo).WithClient(lotusClient).StartDeal(&dealConfig)
+					if err == nil {
+						break
+					}
+				}
+
 				if err != nil {
 					deals = append(deals, &libmodel.DealInfo{
 						MinerFid:   dealConfig.MinerFid,
@@ -262,7 +269,7 @@ func (cmdDeal *CmdDeal) sendDeals2Miner(taskName string, outputDir string, fileD
 						StartEpoch: int(dealConfig.StartEpoch),
 						Cost:       "fail",
 					})
-					logs.GetLogger().Error(err)
+					logs.GetLogger().Errorf("failed to query-ask miner after trying 3 times, error: %v", err)
 					continue
 				}
 				deal = &libmodel.DealInfo{
@@ -272,7 +279,14 @@ func (cmdDeal *CmdDeal) sendDeals2Miner(taskName string, outputDir string, fileD
 					Cost:       "0",
 				}
 			} else {
-				dealCid, err := lotusClient.LotusClientStartDeal(&dealConfig)
+				var dealCid *string
+				for i := 0; i < 3; i++ {
+					dealCid, err = lotusClient.LotusClientStartDeal(&dealConfig)
+					if err == nil {
+						break
+					}
+				}
+
 				if err != nil {
 					deals = append(deals, &libmodel.DealInfo{
 						MinerFid:   dealConfig.MinerFid,
@@ -280,7 +294,7 @@ func (cmdDeal *CmdDeal) sendDeals2Miner(taskName string, outputDir string, fileD
 						StartEpoch: int(dealConfig.StartEpoch),
 						Cost:       "fail",
 					})
-					logs.GetLogger().Error(err)
+					logs.GetLogger().Errorf("failed to query-ask miner after trying 3 times, error: %v", err)
 					continue
 				}
 				if dealCid == nil {

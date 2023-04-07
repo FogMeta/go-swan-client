@@ -572,8 +572,17 @@ func (lotusClient *LotusClient) CheckDealConfig(dealConfig *model.DealConfig) (*
 		return nil, err
 	}
 
-	minerConfig, err := lotusClient.LotusClientQueryAsk(dealConfig.MinerFid)
+	var minerConfig *MinerConfig
+	var err error
+	for i := 0; i < 3; i++ {
+		minerConfig, err = lotusClient.LotusClientQueryAsk(dealConfig.MinerFid)
+		if err == nil {
+			break
+		}
+	}
+
 	if err != nil {
+		err = fmt.Errorf("failed to query-ask miner after trying 3 times")
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
