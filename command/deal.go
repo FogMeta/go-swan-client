@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"math/big"
 	"path/filepath"
 	"strings"
 	"time"
@@ -252,7 +253,8 @@ func (cmdDeal *CmdDeal) sendDeals2Miner(taskName string, outputDir string, fileD
 			var cost string
 			var deal *libmodel.DealInfo
 			if cmdDeal.MarketVersion == libconstants.MARKET_VERSION_2 {
-				dealUuid, err := boost.GetClient(cmdDeal.SwanRepo).WithClient(lotusClient).StartDeal(&dealConfig)
+				pieceSize, _ := utils.CalculatePieceSize(dealConfig.FileSize, true)
+				dealUuid, err := boost.GetClient(cmdDeal.SwanRepo).WithClient(lotusClient).StartDealDirect(pieceSize, big.Int{}, &dealConfig)
 				if err != nil {
 					deals = append(deals, &libmodel.DealInfo{
 						MinerFid:   dealConfig.MinerFid,
@@ -270,7 +272,8 @@ func (cmdDeal *CmdDeal) sendDeals2Miner(taskName string, outputDir string, fileD
 					Cost:       "0",
 				}
 			} else {
-				dealCid, err := lotusStartDeal(lotusClient, &dealConfig)
+				pieceSize, _ := utils.CalculatePieceSize(dealConfig.FileSize, false)
+				dealCid, err := lotusClient.StartDeal(pieceSize, big.Int{}, &dealConfig)
 				if err != nil {
 					deals = append(deals, &libmodel.DealInfo{
 						MinerFid:   dealConfig.MinerFid,
